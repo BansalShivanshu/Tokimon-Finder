@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="TokimonFinder:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/TokimonFinder_jar</output-path>
+    <root id="archive" name="TokimonFinder.jar">
+      <element id="module-output" name="TokimonFinder" />
+    </root>
+  </artifact>
+</component>
