@@ -1,6 +1,8 @@
 package ca.sfu.cmpt213.assignment3.ui;
 
+import ca.sfu.cmpt213.assignment3.model.LetterGrid;
 import ca.sfu.cmpt213.assignment3.model.DefaultMetaData;
+import ca.sfu.cmpt213.assignment3.model.Grid;
 
 import java.util.Arrays;
 import java.util.Scanner;
@@ -14,9 +16,14 @@ public class TokimonFinder {
     private static int numFoki;
     private static boolean hasFlagToki, hasFlagFoki, cheatMode;
 
-    private static String initialPosition;
+    private static String position;
+    private static char currentRow;
+    private static int currentColumn;
 
     private static Scanner scanner;
+
+    private static Menu menu;
+    private static Grid grid;
 
 
     /*
@@ -24,6 +31,7 @@ public class TokimonFinder {
      */
     public static void main(String[] args) {
         scanner = new Scanner(System.in);
+        menu = new Menu();
 
         /*
         Initialisation Stage
@@ -37,17 +45,46 @@ public class TokimonFinder {
         // Welcome the user
         welcome();
 
+        // set the randomly generated grid with respect to
+        // the number of Tokimons and Fokimons
+        grid = Grid.getInstance();
+        grid.setLetterGrid(numToki, numFoki);
+//        char[][] letterGrid = LetterGrid.assginGrid(numToki, numFoki);
+
+        // Print the grid before asking where to start
+        // so that the user can have an idea of what the grid looks like
+        if (cheatMode) {
+            printCheatGrid();
+        } else {
+            printBaseGrid();
+        }
+
         /*
-        Initial Position
+        Get Initial Position
          */
         System.out.println("");
         do {
             System.out.print("Where would you like to Begin? (ex: B5): ");
-            initialPosition = scanner.nextLine();
-        } while (!validatePosition(initialPosition));
+            position = scanner.nextLine();
+        } while (!validatePosition(position));
 
 
-    }
+        int retVal = grid.setPosition(currentRow, currentColumn);
+        System.out.println(retVal);
+        printBaseGrid();
+        grid.removeSymbol(currentRow, currentColumn);
+        printBaseGrid();
+
+
+
+
+        // set the position on the grid
+//        grid.setPosition(currentRow, currentColumn);
+
+
+
+
+    }   // end of main
 
 
     /*
@@ -58,11 +95,19 @@ public class TokimonFinder {
         System.out.println("********** Welcome to the Tokimon Finder Game **********");
         System.out.println("****** Enjoy the Experience as a Tokimon Trainer ******");
         System.out.println("");
+
         System.out.println("Correct Usage: java -jar [path to jar file] [potential --numToki=X flag] " +
                 "[potential --numFoki=X flag] [potential --cheat mode flag]");
+        System.out.println("Flags Avaiable:");
+        System.out.println("\t--numToki=X for defining number of Tokimons (>= 5)");
+        System.out.println("\t--numFoki=X for defining number of Fokimons (>= 5");
+        System.out.println("\t--cheat for turning cheat mode on (displays all locations at start)");
+        System.out.println("\t\tIn cheat mode T = Tokimon, F = Fokimon, N = Nothing");
+
         System.out.println("Column Letters: " + Arrays.toString(DefaultMetaData.getRowLetters()));
         System.out.println("Row Numbers: " + Arrays.toString(DefaultMetaData.getColNumbers()));
         System.out.println("Initial Position Correct Usage: [Row Letter][Column Number]");
+        System.out.println("");
     }
 
     /*
@@ -198,6 +243,30 @@ public class TokimonFinder {
         System.exit(2001); // status code for invalid argument
     }
 
+    /*
+    Print the basic grid taken from the Grid.java
+     */
+    private static void printBaseGrid() {
+        for (int row = 0; row < grid.getGridRowLength(); row++) {
+            for (int col = 0; col < grid.getGridColLength(); col++) {
+                System.out.print(grid.getGridCellAt(row, col) + "\t");
+            }
+            System.out.println("");
+        }
+    }
+
+    /*
+    Print the cheat grid taken from the Grid.java
+     */
+    private static void printCheatGrid() {
+        for (int row = 0; row < grid.getGridRowLength(); row++) {
+            for (int col = 0; col < grid.getGridColLength(); col++) {
+                System.out.print(grid.getGridCheatCellAt(row, col) + "\t");
+            }
+            System.out.println("");
+        }
+    }
+
     private static boolean validatePosition(String position) {
         if (position.length() < DefaultMetaData.getLowerPositionLength() ||
         position.length() > DefaultMetaData.getUpperPositionLength()) {
@@ -207,22 +276,32 @@ public class TokimonFinder {
             return false;
         }
 
-        char col = position.charAt(0);
-        char[] colArr = DefaultMetaData.getRowLetters();
-        if(Arrays.binarySearch(colArr, Character.toUpperCase(col)) < 0 ||
-                Arrays.binarySearch(colArr, Character.toUpperCase(col)) >= colArr.length) {
+        char row = position.charAt(0);
+        char[] rowArr = DefaultMetaData.getRowLetters();
+        if(Arrays.binarySearch(rowArr, Character.toUpperCase(row)) < 0 ||
+                Arrays.binarySearch(rowArr, Character.toUpperCase(row)) >= rowArr.length) {
             System.out.println("First character should be a letter");
             return false;
         }
+        currentRow = Character.toUpperCase(row);
 
-        String row = position.substring(1);
+        String column = position.substring(1);
         try {
-            int temp = Integer.parseInt(row);
+            currentColumn = Integer.parseInt(column);
         } catch (NumberFormatException e) {
             System.out.println("Second character and beyond must be a number");
             return false;
         }
+        int[] colArr = DefaultMetaData.getColNumbers();
+        if (Arrays.binarySearch(colArr, currentColumn) < 0 ||
+            Arrays.binarySearch(colArr, currentColumn) >= colArr.length) {
+            System.out.println("Number not found");
+            return false;
+        }
+
 
         return true;
     }
+
+
 }

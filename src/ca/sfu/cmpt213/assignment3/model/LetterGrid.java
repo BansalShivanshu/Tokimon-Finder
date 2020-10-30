@@ -2,15 +2,15 @@ package ca.sfu.cmpt213.assignment3.model;
 
 import java.util.Arrays;
 
-public class AssignGrid {
-    /*
-    Assign positions to tokimons and fokimons on a matrix randomly
-    PreConditios: Has determined number of tokimons and fokimons
-                    to be placed
-    Returns a matrix of character values where
-        'T' stands for Tokimons
-        'F' stands for Fokimons
-        'N' stands for Nothing (Empty Location)
+public class LetterGrid {
+    /**
+     *  Assign positions to tokimons and fokimons on a matrix randomly
+     *     PreConditios: Has determined number of tokimons and fokimons
+     *                     to be placed
+     *     Returns a matrix of character values where
+     *         'T' stands for Tokimons
+     *         'F' stands for Fokimons
+     *         'N' stands for Nothing (Empty Location)
      */
     public static char[][] assginGrid(int numToki, int numFoki) {
         char[][] letterGrid = new char[DefaultMetaData.getNumRow()][DefaultMetaData.getNumCol()];
@@ -50,6 +50,9 @@ public class AssignGrid {
         return letterGrid;
     }
 
+    /*
+    Assign the value 'N' to all fields of matrix letterGrid
+     */
     private static void assign_N(char[][] letterGrid) {
         for (int row = 0; row < DefaultMetaData.getNumRow(); row++) {
             for (int col = 0; col < DefaultMetaData.getNumCol(); col++) {

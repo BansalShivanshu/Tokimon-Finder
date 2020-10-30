@@ -23,6 +23,8 @@ public class DefaultMetaData {
 
     private static final char[] gridValues = { 'T', 'F', 'N' };
 
+    private static final char[] symbols = { '~', '$', ' ', '@' };
+
 
 
     public static int getNumRow() {
@@ -64,22 +66,55 @@ public class DefaultMetaData {
     }
 
     public static char[] getRowLetters() {
-        return ROW_LETTERS;
+        return ROW_LETTERS.clone();
+    }
+
+    public static char getRowLetterAt(int index) {
+        if (index < 0 || index >= ROW_LETTERS.length) {
+            throw new IllegalArgumentException("Index Out Of Bound (getRowLetterAt())");
+        }
+        return ROW_LETTERS[index];
     }
 
     public static int[] getColNumbers() {
-        return COL_NUMBERS;
+        return COL_NUMBERS.clone();
     }
 
-    public static char[] getGridValues() {
-        return gridValues;
+    public static int getColNumberAt(int index) {
+        if (index < 0 || index >= COL_NUMBERS.length) {
+            throw new IllegalArgumentException("Index out of bound (getColNumberAt()");
+        }
+        return COL_NUMBERS[index];
     }
 
+    /**
+     *  Returns the character value acceptable by a letter grid
+     *     Allowed Indices:
+     *         0: 'T'  Tokimon
+     *         1: 'F'  Fokimon
+     *         2: 'N'  Nothing
+     */
     public static char getGridValue(int index) {
         if (index < 0 || index >= gridValues.length) {
             throw new IllegalArgumentException("Index out of Bound (GridValues)");
         } else {
             return gridValues[index];
+        }
+    }
+
+    /**
+     *  Returns the character symbols acceptable to main grid
+     *     Allowed Indices:
+     *         0: '~'  Indicated Unknown (Unvisited)
+     *         1: '$'  Indicates a Found Tokimon
+     *         2: ' '  (Space) Indicates a Visited but Empty Location
+     *         3: '@'   Player's Current Position
+     */
+    public static char getSymbolAt(int index) {
+        if (index < 0 || index >= symbols.length) {
+            throw new IllegalArgumentException("Index out of Bound (Symbols)");
+        } else {
+            return symbols[index];
         }
     }
 }
