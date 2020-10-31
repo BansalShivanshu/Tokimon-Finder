@@ -1,10 +1,16 @@
 package ca.sfu.cmpt213.assignment3.model;
 
 /**
+ * @author Shivanshu Bansal
+ * Spells.java is responsible for handling various
+ * spells that are available to a user throughout
+ * the course of their gameplay
+ *
  *  Does not have static methods because the class
  *  using this should contain a set of spells i.e. an object
  *
- *  Since the class is mutable it is Singleton
+ *  Since the class is mutable and can potentially be
+ *  instantiated at sever places, it is Singleton
  */
 public class Spells {
 

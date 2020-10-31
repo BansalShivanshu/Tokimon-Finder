@@ -2,6 +2,13 @@ package ca.sfu.cmpt213.assignment3.model;
 
 import java.util.Arrays;
 
+/**
+ * @author Shivanshu Bansal
+ * LetterGrid.java is a crusial class to
+ * the project as it allows for random
+ * assignment of game objects to a grid pattern
+ * for further use.
+ */
 public class LetterGrid {
     /**
      *  Assign positions to tokimons and fokimons on a matrix randomly

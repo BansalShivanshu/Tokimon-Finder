@@ -1,12 +1,24 @@
 package ca.sfu.cmpt213.assignment3.ui;
 
-import ca.sfu.cmpt213.assignment3.model.LetterGrid;
 import ca.sfu.cmpt213.assignment3.model.DefaultMetaData;
 import ca.sfu.cmpt213.assignment3.model.Grid;
+import jdk.swing.interop.SwingInterOpUtils;
 
 import java.util.Arrays;
 import java.util.Scanner;
 
+/**
+ * @author Shivanshu Bansal
+ * This is the main class of the project and is
+ * responsible for first hand communication with
+ * the user.
+ *
+ * It is responsible for accepting and processing
+ * input, validation of arguments, collaborating
+ * with Grid class to facilitate manipulation of
+ * the grid as the game progresses, and with menu
+ * to facilitate user engagement.
+ */
 public class TokimonFinder {
 
     /*
@@ -15,6 +27,7 @@ public class TokimonFinder {
     private static int numToki;
     private static int numFoki;
     private static boolean hasFlagToki, hasFlagFoki, cheatMode;
+    private static int tokimonsCollected = 0;
 
     private static String position;
     private static char currentRow;
@@ -63,26 +76,111 @@ public class TokimonFinder {
         Get Initial Position
          */
         System.out.println("");
-        do {
-            System.out.print("Where would you like to Begin? (ex: B5): ");
-            position = scanner.nextLine();
-        } while (!validatePosition(position));
+        getNewLocation();
 
 
         int retVal = grid.setPosition(currentRow, currentColumn);
-        System.out.println(retVal);
+        if (retVal == 0) {
+            tokimonFound();
+        } else if (retVal == 1) {
+            fokimonFound();
+        }
         printBaseGrid();
-        grid.removeSymbol(currentRow, currentColumn);
-        printBaseGrid();
 
 
+        while (true) {
+            menu.displayMenu();
 
+            char choice = menu.getMenuOption();
 
-        // set the position on the grid
-//        grid.setPosition(currentRow, currentColumn);
+            if (Character.toUpperCase(choice) == 'W') {
+                // if already in the first row
+                if (currentRow == DefaultMetaData.getRowLetterAt(0)) {
+                    System.out.println("Cannot move up");
+                    System.out.println("");
+                    printBaseGrid();
+                    continue;
+                }
+                // else
+                moveUp();
+            } else if (Character.toUpperCase(choice) == 'A') {
+                // if already on the first column
+                if (currentColumn == DefaultMetaData.getColNumberAt(0)) {
+                    System.out.println("Cannot move left");
+                    System.out.println("");
+                    printBaseGrid();
+                    continue;
+                }
+                // else
+                moveLeft();
+            } else if (Character.toUpperCase(choice) == 'S') {
+                // if already on the last row
+                if (currentRow == DefaultMetaData.getRowLetterAt(
+                        DefaultMetaData.getNumRow() - 1
+                )) {
+                    System.out.println("Cannot move down");
+                    System.out.println("");
+                    printBaseGrid();
+                    continue;
+                }
+                // else
+                moveDown();
+            } else if (Character.toUpperCase(choice) == 'D') {
+                // if already on the last column
+                if (currentColumn == DefaultMetaData.getColNumberAt(
+                        DefaultMetaData.getNumCol() - 1
+                )) {
+                    System.out.println("Cannot move right");
+                    System.out.println("");
+                    printBaseGrid();
+                    continue;
+                }
+                // else
+                moveRight();
+            } else if (choice == '1') {
+                menu.displaySpells();
+                int selection = menu.getSpellSelection();
 
+                if (selection == -1) {
+                    continue;
+                }
 
+                if (selection == 1) {
+                    // remove from current position
+                    grid.removeSymbol(currentRow, currentColumn);
 
+                    // jump to another location
+                    getNewLocation();
+                } else if (selection == 2) {
+                    // reveal tokimon
+                    revealTokimon();
+                    printBaseGrid();
+                    continue;
+                } else if (selection == 3) {
+                    killFokimon();
+                    printBaseGrid();
+                    continue;
+                }
+
+            } else if (choice == '2') {
+                printBaseGrid();
+                continue;
+            } else if (choice == '3') {
+                printCheatGrid();
+                System.out.println("GoodBye!");
+                break;
+            }
+
+            // set the new position
+            retVal = grid.setPosition(currentRow, currentColumn);
+            if (retVal == 0) {
+                tokimonFound();
+            } else if (retVal == 1) {
+                fokimonFound();
+            }
+
+            printBaseGrid();
+        }
 
     }   // end of main
 
@@ -107,6 +205,9 @@ public class TokimonFinder {
         System.out.println("Column Letters: " + Arrays.toString(DefaultMetaData.getRowLetters()));
         System.out.println("Row Numbers: " + Arrays.toString(DefaultMetaData.getColNumbers()));
         System.out.println("Initial Position Correct Usage: [Row Letter][Column Number]");
+        System.out.println("");
+        System.out.println("");
+        System.out.println("Starting out with " + numToki + " Tokimons and " + numFoki + " Fokimons");
         System.out.println("");
     }
 
@@ -243,6 +344,15 @@ public class TokimonFinder {
         System.exit(2001); // status code for invalid argument
     }
 
+    private static void getNewLocation() {
+        do {
+            System.out.print("Where would you like to Begin? (ex: B5): ");
+            position = scanner.nextLine();
+        } while (!validatePosition(position));
+
+
+    }
+
     /*
     Print the basic grid taken from the Grid.java
      */
@@ -253,12 +363,24 @@ public class TokimonFinder {
             }
             System.out.println("");
         }
+
+        System.out.println("Number of Tokimons Collected: " + tokimonsCollected);
+        System.out.println("Number of Tokimons Left: " + numToki);
+        System.out.println("Number of Fokimons Left: " + numFoki);
+        System.out.println("Number of Spells Left  : " + spellsLeft());
+        System.out.println("");
+    }
+
+    private static int spellsLeft() {
+        return menu.getSpellsLeft();
     }
 
     /*
     Print the cheat grid taken from the Grid.java
      */
     private static void printCheatGrid() {
+        System.out.println("    $ == Tokimon | X == Fokimon");
+        System.out.println("");
         for (int row = 0; row < grid.getGridRowLength(); row++) {
             for (int col = 0; col < grid.getGridColLength(); col++) {
                 System.out.print(grid.getGridCheatCellAt(row, col) + "\t");
@@ -303,5 +425,102 @@ public class TokimonFinder {
         return true;
     }
 
+    private static void moveUp() {
+        // remove current position pointer
+        grid.removeSymbol(currentRow, currentColumn);
 
+        int indexOfRow = Arrays.binarySearch(DefaultMetaData.getRowLetters(),
+                currentRow);
+        // decrement the index
+        indexOfRow--;
+        currentRow = DefaultMetaData.getRowLetterAt(indexOfRow);
+    }
+
+    private static void moveLeft() {
+        // remove current position pointer
+        grid.removeSymbol(currentRow, currentColumn);
+
+        int indexOfCol = Arrays.binarySearch(DefaultMetaData.getColNumbers(),
+                currentColumn);
+        // decrement the index
+        indexOfCol--;
+        currentColumn = DefaultMetaData.getColNumberAt(indexOfCol);
+    }
+
+    private static void moveDown() {
+        // remove current position pointer
+        grid.removeSymbol(currentRow, currentColumn);
+
+        int indexOfRow = Arrays.binarySearch(DefaultMetaData.getRowLetters(),
+                currentRow);
+        // increment the index
+        indexOfRow++;
+        currentRow = DefaultMetaData.getRowLetterAt(indexOfRow);
+    }
+
+    private static void moveRight() {
+        // remove current position pointer
+        grid.removeSymbol(currentRow, currentColumn);
+
+        int indexOfCol = Arrays.binarySearch(DefaultMetaData.getColNumbers(),
+                currentColumn);
+        // decrement the index
+        indexOfCol++;
+        currentColumn = DefaultMetaData.getColNumberAt(indexOfCol);
+    }
+
+    private static void tokimonFound() {
+        // decrement tokimon
+        numToki--;
+
+        // increment the tokimons collected
+        tokimonsCollected++;
+
+        // congratulate user
+        System.out.println("You Just Found a Tokimon!");
+
+        // check if won the game
+        if (numToki == 0) {
+            printCheatGrid();
+
+            System.out.println("YOU WON THE GAME!!!");
+            System.out.println("!*!*!*!* CONGRATULATIONS *!*!*!*!");
+
+            System.exit(0);
+        }
+    }
+
+    private static void fokimonFound() {
+        // decrement fokimon
+        numFoki--;
+
+        // notify the user
+        System.out.println("!!!*** You just landed on a FOKIMON ***!!!");
+        System.out.println("--------------- Game Over! ---------------");
+
+        grid.showAFokimon(currentRow, currentColumn);
+        printCheatGrid();
+
+        System.exit(0);
+    }
+
+    private static void revealTokimon() {
+        boolean revealed = grid.revealTokimon();
+        if (revealed) {
+            tokimonFound();
+        } else {
+            System.out.println("No tokimon to reveal");
+            System.out.println("Unexpected Error Occurred");
+        }
+    }
+
+    private static void killFokimon() {
+        // decrement number of fokimons
+        numFoki--;
+
+        grid.killFokimon();
+
+        System.out.println("               !!! A Fokimon has been Killed !!!");
+        System.out.println("The location it had previously acquired is replaced now with blank space");;
+    }
 }
